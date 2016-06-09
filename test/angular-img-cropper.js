@@ -471,6 +471,31 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     }
                 };
 
+                ImageCropper.prototype.swapAspect = function () {
+                    var tmp = scope.minWidth;
+                    scope.minWidth  = scope.minHeight;
+                    scope.minHeight = scope.minWidth;
+                    this.aspectRatio = 1 / this.aspectRatio;
+                    this.updateClampBounds();
+                };
+
+                ImageCropper.prototype.checkSwap = function (x, y, marker) {
+                    var anchorMarker = marker.getHorizontalNeighbour().getVerticalNeighbour();
+                    ax = anchorMarker.getPosition().x;
+                    ay = anchorMarker.getPosition().y;
+
+                    var xlen = Math.abs(ax - x);
+                    var ylen = Math.abs(ay - y);
+
+                    if (this.aspectRatio > 1) {
+                        if (xlen > ylen)
+                            this.swapAspect();
+                    } else if (this.aspectRatio < 1) {
+                        if (xlen < ylen)
+                            this.swapAspect();
+                    }
+                };
+
                 ImageCropper.prototype.enforceMinSize = function (x, y, marker) {
 
                     var xLength = x - marker.getHorizontalNeighbour().getPosition().x;
@@ -765,11 +790,15 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     for (var k = 0; k < this.currentDragTouches.length; k++) {
                         if (newCropTouch.id == this.currentDragTouches[k].id && this.currentDragTouches[k].dragHandle != null) {
                             var dragTouch = this.currentDragTouches[k];
-                            var clampedPositions = this.clampPosition(newCropTouch.x - dragTouch.dragHandle.offset.x, newCropTouch.y - dragTouch.dragHandle.offset.y);
+                            var unclampedPositionsX = newCropTouch.x - dragTouch.dragHandle.offset.x;
+                            var unclampedPositionsY = newCropTouch.y - dragTouch.dragHandle.offset.y;
+                            var clampedPositions = this.clampPosition(unclampedPositionsX, unclampedPositionsY);
                             newCropTouch.x = clampedPositions.x;
                             newCropTouch.y = clampedPositions.y;
                             PointPool.instance.returnPoint(clampedPositions);
                             if (dragTouch.dragHandle instanceof CornerMarker) {
+                                this.checkSwap(unclampedPositionsX, unclampedPositionsY, dragTouch.dragHandle);
+
                                 this.dragCorner(newCropTouch.x, newCropTouch.y, dragTouch.dragHandle);
                             }
                             else {
@@ -790,6 +819,9 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                                 marker.setDrag(true);
                                 newCropTouch.dragHandle.offset.x = newCropTouch.x - newCropTouch.dragHandle.getPosition().x;
                                 newCropTouch.dragHandle.offset.y = newCropTouch.y - newCropTouch.dragHandle.getPosition().y;
+                                this.checkSwap(newCropTouch.dragHandle.offset.x,
+                                               newCropTouch.dragHandle.offset.y,
+                                               newCropTouch.drawHandle);
                                 this.dragCorner(newCropTouch.x - newCropTouch.dragHandle.offset.x, newCropTouch.y - newCropTouch.dragHandle.offset.y, newCropTouch.dragHandle);
                                 break;
                             }
