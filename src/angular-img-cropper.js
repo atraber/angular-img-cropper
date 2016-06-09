@@ -821,7 +821,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                                 newCropTouch.dragHandle.offset.y = newCropTouch.y - newCropTouch.dragHandle.getPosition().y;
                                 this.checkSwap(newCropTouch.dragHandle.offset.x,
                                                newCropTouch.dragHandle.offset.y,
-                                               newCropTouch.drawHandle);
+                                               newCropTouch.dragHandle);
                                 this.dragCorner(newCropTouch.x - newCropTouch.dragHandle.offset.x, newCropTouch.y - newCropTouch.dragHandle.offset.y, newCropTouch.dragHandle);
                                 break;
                             }
