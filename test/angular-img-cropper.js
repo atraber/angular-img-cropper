@@ -475,8 +475,12 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     var tmp = scope.minWidth;
                     scope.minWidth  = scope.minHeight;
                     scope.minHeight = scope.minWidth;
+                    tmp = scope.cropWidth;
+                    scope.cropWidth  = scope.cropHeight;
+                    scope.cropHeight = tmp;
                     this.aspectRatio = 1 / this.aspectRatio;
                     this.updateClampBounds();
+                    this.getCroppedImage(scope.cropWidth, scope.cropHeight);
                 };
 
                 ImageCropper.prototype.checkSwap = function (x, y, marker) {
