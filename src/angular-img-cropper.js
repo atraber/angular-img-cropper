@@ -9,7 +9,13 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
             touchRadius: "=",
             cropAreaBounds: "=",
             minWidth: "=",
-            minHeight: "="
+            minHeight: "=",
+            iconStyle: "=",
+            cornerStyle: "=",
+            cornerBorderStyle: "=",
+            borderStyle: "=",
+            transparentStyle: "=",
+            emptyStyle: "="
         },
         restrict: "A",
         link: function (scope, element, attrs) {
@@ -159,7 +165,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                         ctx.lineTo(p.x + this.position.x, p.y + this.position.y);
                     }
                     ctx.closePath();
-                    ctx.fillStyle = 'rgba(255,228,0,1)';
+                    ctx.fillStyle = scope.iconStyle;
                     ctx.fill();
                 };
                 DragMarker.prototype.recalculatePosition = function (bounds) {
@@ -197,7 +203,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     ctx.lineTo(this.position.x, this.position.y);
                     ctx.closePath();
                     ctx.lineWidth = 2;
-                    ctx.strokeStyle = 'rgba(255,228,0,1)';
+                    ctx.strokeStyle = scope.cornerBorderStyle;
                     ctx.stroke();
                 };
                 CornerMarker.prototype.drawCornerFill = function (ctx) {
@@ -220,7 +226,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                     ctx.lineTo(this.position.x, this.position.y + (sideLength * vDirection));
                     ctx.lineTo(this.position.x, this.position.y);
                     ctx.closePath();
-                    ctx.fillStyle = 'rgba(0,0,0,1)';
+                    ctx.fillStyle = scope.cornerStyle;
                     ctx.fill();
                 };
                 CornerMarker.prototype.moveX = function (x) {
@@ -419,7 +425,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                             this.drawImageIOSFix(ctx, this.srcImage, 0, 0, this.srcImage.width, this.srcImage.height, 0, this.buffer.height / 2 - h / 2, w, h);
                         }
                         this.buffer.getContext('2d').drawImage(this.canvas, 0, 0, this.canvasWidth, this.canvasHeight);
-                        ctx.fillStyle = "rgba(0, 0, 0, 0.7)";
+                        ctx.fillStyle = scope.transparentStyle;
                         ctx.fillRect(0, 0, this.canvasWidth, this.canvasHeight);
                         ctx.drawImage(this.buffer, bounds.left, bounds.top, Math.max(bounds.getWidth(), 1), Math.max(bounds.getHeight(), 1), bounds.left, bounds.top, bounds.getWidth(), bounds.getHeight());
                         var marker;
@@ -429,11 +435,10 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                         }
                         this.center.draw(ctx);
                         ctx.lineWidth = 2;
-                        ctx.strokeStyle = 'rgba(255,228,0,1)';
+                        ctx.strokeStyle = scope.borderStyle;
                         ctx.strokeRect(bounds.left, bounds.top, bounds.getWidth(), bounds.getHeight());
-                    }
-                    else {
-                        ctx.fillStyle = 'rgba(192,192,192,1)';
+                    } else {
+                        ctx.fillStyle = scope.emptyStyle;
                         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
                     }
                 };
@@ -474,7 +479,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
                 ImageCropper.prototype.swapAspect = function () {
                     var tmp = scope.minWidth;
                     scope.minWidth  = scope.minHeight;
-                    scope.minHeight = scope.minWidth;
+                    scope.minHeight = tmp;
                     tmp = scope.cropWidth;
                     scope.cropWidth  = scope.cropHeight;
                     scope.cropHeight = tmp;
@@ -504,7 +509,7 @@ angular.module('angular-img-cropper', []).directive("imageCropper", ['$document'
 
                     var xLength = x - marker.getHorizontalNeighbour().getPosition().x;
                     var yLength = y - marker.getVerticalNeighbour().getPosition().y;
-                    var xOver = scope.minWidth - Math.abs(xLength);
+                    var xOver = scope.minWidth  - Math.abs(xLength);
                     var yOver = scope.minHeight - Math.abs(yLength);
 
                     if (xLength == 0 || yLength == 0) {
